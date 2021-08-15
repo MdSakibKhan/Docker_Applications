@@ -1,7 +1,30 @@
 version: "3.7"
 
 services:
-    
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: core_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql 
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000
+      - PORT=80
+    expose:
+      - "80"
+    ports:
+      - "5050:80"
+
   backend:
     build:
       context: ./backend
@@ -16,17 +39,3 @@ services:
     depends_on:
       - mysql
     command: ["./wait-for-it.sh", "mysql:3306", "--" , "npm","start"]
-
-
-  mysql:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: 1234
-      MYSQL_DATABASE: core_db
-    ports:
-      - "3307:3306"
-    volumes:
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql 
-
